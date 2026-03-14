@@ -3,7 +3,7 @@ import { Sprout } from 'lucide-react';
 
 export default function AuthLayout() {
   return (
-    <div className="min-h-screen flex">
+    <div className="h-screen flex">
       {/* Left Panel - Branding */}
       <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-green-600 via-green-700 to-emerald-800 relative overflow-hidden">
         <div className="absolute inset-0 opacity-10">
@@ -42,8 +42,8 @@ export default function AuthLayout() {
       </div>
 
       {/* Right Panel - Form */}
-      <div className="flex-1 flex items-center justify-center p-6 sm:p-12 bg-gray-50">
-        <div className="w-full max-w-md">
+      <div className="flex-1 flex items-center justify-center overflow-y-auto p-6 bg-gray-50">
+        <div className="w-full max-w-md py-4">
           {/* Mobile logo */}
           <div className="lg:hidden flex items-center gap-2 mb-8 justify-center">
             <div className="w-10 h-10 bg-green-600 rounded-xl flex items-center justify-center">

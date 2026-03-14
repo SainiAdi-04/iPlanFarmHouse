@@ -4,7 +4,7 @@ export interface User {
   id: string;
   name: string;
   email: string;
-  role: 'ADMIN' | 'FARMER' | 'CUSTOMER';
+  role: 'ADMIN' | 'FARMER' | 'CUSTOMER' | 'EXPERT';
   createdAt: string;
   updatedAt: string;
 }
@@ -29,7 +29,7 @@ export interface RegisterPayload {
   name: string;
   email: string;
   password: string;
-  role: 'FARMER' | 'CUSTOMER';
+  role: 'FARMER' | 'CUSTOMER' | 'EXPERT';
 }
 
 export interface LoginPayload {

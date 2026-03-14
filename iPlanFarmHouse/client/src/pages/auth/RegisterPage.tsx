@@ -1,11 +1,11 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Eye, EyeOff, Mail, Lock, User, Loader2, Tractor, ShoppingBag } from 'lucide-react';
+import { Eye, EyeOff, Mail, Lock, User, Loader2, Tractor, ShoppingBag, GraduationCap } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useAuth } from '../../context/AuthContext';
 import { AxiosError } from 'axios';
 
-type Role = 'FARMER' | 'CUSTOMER';
+type Role = 'FARMER' | 'CUSTOMER' | 'EXPERT';
 
 export default function RegisterPage() {
   const { register } = useAuth();
@@ -87,174 +87,159 @@ export default function RegisterPage() {
 
   return (
     <div>
-      <h2 className="text-2xl font-bold text-gray-900">Create your account</h2>
-      <p className="mt-2 text-sm text-gray-500">
-        Join iPlanFarmHouse to get started
-      </p>
+      <h2 className="text-xl font-bold text-gray-900">Create your account</h2>
+      <p className="mt-1 text-sm text-gray-500">Join iPlanFarmHouse to get started</p>
 
-      <form onSubmit={handleSubmit} className="mt-8 space-y-5">
+      <form onSubmit={handleSubmit} className="mt-5 space-y-3">
         {/* Role Selection */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">I am a</label>
-          <div className="grid grid-cols-2 gap-3">
-            <button
-              type="button"
-              onClick={() => setRole('CUSTOMER')}
-              className={`flex items-center gap-3 p-3.5 rounded-xl border-2 transition-all cursor-pointer ${
-                form.role === 'CUSTOMER'
-                  ? 'border-green-500 bg-green-50 ring-2 ring-green-500/20'
-                  : 'border-gray-200 bg-white hover:border-gray-300'
-              }`}
-            >
-              <div className={`w-9 h-9 rounded-lg flex items-center justify-center ${
-                form.role === 'CUSTOMER' ? 'bg-green-100' : 'bg-gray-100'
-              }`}>
-                <ShoppingBag className={`w-4.5 h-4.5 ${form.role === 'CUSTOMER' ? 'text-green-600' : 'text-gray-500'}`} />
-              </div>
-              <div className="text-left">
-                <div className={`text-sm font-semibold ${form.role === 'CUSTOMER' ? 'text-green-700' : 'text-gray-700'}`}>
-                  Customer
+          <div className="grid grid-cols-3 gap-2">
+            {(
+              [
+                { value: 'CUSTOMER' as Role, Icon: ShoppingBag, label: 'Customer' },
+                { value: 'FARMER'   as Role, Icon: Tractor,      label: 'Farmer'   },
+                { value: 'EXPERT'   as Role, Icon: GraduationCap, label: 'Expert'  },
+              ]
+            ).map(({ value, Icon, label }) => (
+              <button
+                key={value}
+                type="button"
+                onClick={() => setRole(value)}
+                className={`flex flex-col items-center gap-1.5 py-2.5 px-2 rounded-xl border-2 transition-all cursor-pointer ${
+                  form.role === value
+                    ? 'border-green-500 bg-green-50 ring-2 ring-green-500/20'
+                    : 'border-gray-200 bg-white hover:border-gray-300'
+                }`}
+              >
+                <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${
+                  form.role === value ? 'bg-green-100' : 'bg-gray-100'
+                }`}>
+                  <Icon className={`w-4 h-4 ${form.role === value ? 'text-green-600' : 'text-gray-500'}`} />
                 </div>
-                <div className="text-xs text-gray-400">Buy fresh produce</div>
+                <span className={`text-xs font-semibold ${form.role === value ? 'text-green-700' : 'text-gray-700'}`}>
+                  {label}
+                </span>
+              </button>
+            ))}
+          </div>
+          {errors.role && <p className="mt-1 text-xs text-red-500">{errors.role}</p>}
+        </div>
+
+        {/* Name + Email */}
+        <div className="grid grid-cols-2 gap-3">
+          <div>
+            <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
+              Full name
+            </label>
+            <div className="relative">
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <User className="h-4 w-4 text-gray-400" />
               </div>
-            </button>
-            <button
-              type="button"
-              onClick={() => setRole('FARMER')}
-              className={`flex items-center gap-3 p-3.5 rounded-xl border-2 transition-all cursor-pointer ${
-                form.role === 'FARMER'
-                  ? 'border-green-500 bg-green-50 ring-2 ring-green-500/20'
-                  : 'border-gray-200 bg-white hover:border-gray-300'
-              }`}
-            >
-              <div className={`w-9 h-9 rounded-lg flex items-center justify-center ${
-                form.role === 'FARMER' ? 'bg-green-100' : 'bg-gray-100'
-              }`}>
-                <Tractor className={`w-4.5 h-4.5 ${form.role === 'FARMER' ? 'text-green-600' : 'text-gray-500'}`} />
+              <input
+                id="name"
+                name="name"
+                type="text"
+                autoComplete="name"
+                value={form.name}
+                onChange={handleChange}
+                placeholder="John Doe"
+                className={`block w-full pl-9 pr-3 py-2 rounded-xl border bg-white text-sm text-gray-900 placeholder:text-gray-400 transition-colors focus:outline-none focus:ring-2 focus:ring-green-500/20 focus:border-green-500 ${
+                  errors.name ? 'border-red-400 focus:ring-red-500/20 focus:border-red-500' : 'border-gray-300'
+                }`}
+              />
+            </div>
+            {errors.name && <p className="mt-1 text-xs text-red-500">{errors.name}</p>}
+          </div>
+
+          <div>
+            <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+              Email
+            </label>
+            <div className="relative">
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <Mail className="h-4 w-4 text-gray-400" />
               </div>
-              <div className="text-left">
-                <div className={`text-sm font-semibold ${form.role === 'FARMER' ? 'text-green-700' : 'text-gray-700'}`}>
-                  Farmer
-                </div>
-                <div className="text-xs text-gray-400">Sell your harvest</div>
+              <input
+                id="email"
+                name="email"
+                type="email"
+                autoComplete="email"
+                value={form.email}
+                onChange={handleChange}
+                placeholder="you@example.com"
+                className={`block w-full pl-9 pr-3 py-2 rounded-xl border bg-white text-sm text-gray-900 placeholder:text-gray-400 transition-colors focus:outline-none focus:ring-2 focus:ring-green-500/20 focus:border-green-500 ${
+                  errors.email ? 'border-red-400 focus:ring-red-500/20 focus:border-red-500' : 'border-gray-300'
+                }`}
+              />
+            </div>
+            {errors.email && <p className="mt-1 text-xs text-red-500">{errors.email}</p>}
+          </div>
+        </div>
+
+        {/* Password + Confirm Password */}
+        <div className="grid grid-cols-2 gap-3">
+          <div>
+            <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
+              Password
+            </label>
+            <div className="relative">
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <Lock className="h-4 w-4 text-gray-400" />
               </div>
-            </button>
-          </div>
-          {errors.role && <p className="mt-1.5 text-xs text-red-500">{errors.role}</p>}
-        </div>
-
-        {/* Name */}
-        <div>
-          <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1.5">
-            Full name
-          </label>
-          <div className="relative">
-            <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
-              <User className="h-4.5 w-4.5 text-gray-400" />
+              <input
+                id="password"
+                name="password"
+                type={showPassword ? 'text' : 'password'}
+                autoComplete="new-password"
+                value={form.password}
+                onChange={handleChange}
+                placeholder="Min 8 chars"
+                className={`block w-full pl-9 pr-9 py-2 rounded-xl border bg-white text-sm text-gray-900 placeholder:text-gray-400 transition-colors focus:outline-none focus:ring-2 focus:ring-green-500/20 focus:border-green-500 ${
+                  errors.password ? 'border-red-400 focus:ring-red-500/20 focus:border-red-500' : 'border-gray-300'
+                }`}
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 transition-colors"
+              >
+                {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+              </button>
             </div>
-            <input
-              id="name"
-              name="name"
-              type="text"
-              autoComplete="name"
-              value={form.name}
-              onChange={handleChange}
-              placeholder="John Doe"
-              className={`block w-full pl-10.5 pr-4 py-2.5 rounded-xl border bg-white text-sm text-gray-900 placeholder:text-gray-400 transition-colors focus:outline-none focus:ring-2 focus:ring-green-500/20 focus:border-green-500 ${
-                errors.name ? 'border-red-400 focus:ring-red-500/20 focus:border-red-500' : 'border-gray-300'
-              }`}
-            />
+            {errors.password && <p className="mt-1 text-xs text-red-500">{errors.password}</p>}
           </div>
-          {errors.name && <p className="mt-1.5 text-xs text-red-500">{errors.name}</p>}
-        </div>
 
-        {/* Email */}
-        <div>
-          <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1.5">
-            Email address
-          </label>
-          <div className="relative">
-            <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
-              <Mail className="h-4.5 w-4.5 text-gray-400" />
+          <div>
+            <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-1">
+              Confirm
+            </label>
+            <div className="relative">
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <Lock className="h-4 w-4 text-gray-400" />
+              </div>
+              <input
+                id="confirmPassword"
+                name="confirmPassword"
+                type={showConfirmPassword ? 'text' : 'password'}
+                autoComplete="new-password"
+                value={form.confirmPassword}
+                onChange={handleChange}
+                placeholder="Re-enter"
+                className={`block w-full pl-9 pr-9 py-2 rounded-xl border bg-white text-sm text-gray-900 placeholder:text-gray-400 transition-colors focus:outline-none focus:ring-2 focus:ring-green-500/20 focus:border-green-500 ${
+                  errors.confirmPassword ? 'border-red-400 focus:ring-red-500/20 focus:border-red-500' : 'border-gray-300'
+                }`}
+              />
+              <button
+                type="button"
+                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 transition-colors"
+              >
+                {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+              </button>
             </div>
-            <input
-              id="email"
-              name="email"
-              type="email"
-              autoComplete="email"
-              value={form.email}
-              onChange={handleChange}
-              placeholder="you@example.com"
-              className={`block w-full pl-10.5 pr-4 py-2.5 rounded-xl border bg-white text-sm text-gray-900 placeholder:text-gray-400 transition-colors focus:outline-none focus:ring-2 focus:ring-green-500/20 focus:border-green-500 ${
-                errors.email ? 'border-red-400 focus:ring-red-500/20 focus:border-red-500' : 'border-gray-300'
-              }`}
-            />
+            {errors.confirmPassword && <p className="mt-1 text-xs text-red-500">{errors.confirmPassword}</p>}
           </div>
-          {errors.email && <p className="mt-1.5 text-xs text-red-500">{errors.email}</p>}
-        </div>
-
-        {/* Password */}
-        <div>
-          <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1.5">
-            Password
-          </label>
-          <div className="relative">
-            <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
-              <Lock className="h-4.5 w-4.5 text-gray-400" />
-            </div>
-            <input
-              id="password"
-              name="password"
-              type={showPassword ? 'text' : 'password'}
-              autoComplete="new-password"
-              value={form.password}
-              onChange={handleChange}
-              placeholder="Min 8 chars, upper + lower + digit"
-              className={`block w-full pl-10.5 pr-11 py-2.5 rounded-xl border bg-white text-sm text-gray-900 placeholder:text-gray-400 transition-colors focus:outline-none focus:ring-2 focus:ring-green-500/20 focus:border-green-500 ${
-                errors.password ? 'border-red-400 focus:ring-red-500/20 focus:border-red-500' : 'border-gray-300'
-              }`}
-            />
-            <button
-              type="button"
-              onClick={() => setShowPassword(!showPassword)}
-              className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-gray-400 hover:text-gray-600 transition-colors"
-            >
-              {showPassword ? <EyeOff className="h-4.5 w-4.5" /> : <Eye className="h-4.5 w-4.5" />}
-            </button>
-          </div>
-          {errors.password && <p className="mt-1.5 text-xs text-red-500">{errors.password}</p>}
-        </div>
-
-        {/* Confirm Password */}
-        <div>
-          <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-1.5">
-            Confirm password
-          </label>
-          <div className="relative">
-            <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
-              <Lock className="h-4.5 w-4.5 text-gray-400" />
-            </div>
-            <input
-              id="confirmPassword"
-              name="confirmPassword"
-              type={showConfirmPassword ? 'text' : 'password'}
-              autoComplete="new-password"
-              value={form.confirmPassword}
-              onChange={handleChange}
-              placeholder="Re-enter your password"
-              className={`block w-full pl-10.5 pr-11 py-2.5 rounded-xl border bg-white text-sm text-gray-900 placeholder:text-gray-400 transition-colors focus:outline-none focus:ring-2 focus:ring-green-500/20 focus:border-green-500 ${
-                errors.confirmPassword ? 'border-red-400 focus:ring-red-500/20 focus:border-red-500' : 'border-gray-300'
-              }`}
-            />
-            <button
-              type="button"
-              onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-              className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-gray-400 hover:text-gray-600 transition-colors"
-            >
-              {showConfirmPassword ? <EyeOff className="h-4.5 w-4.5" /> : <Eye className="h-4.5 w-4.5" />}
-            </button>
-          </div>
-          {errors.confirmPassword && <p className="mt-1.5 text-xs text-red-500">{errors.confirmPassword}</p>}
         </div>
 
         {/* Submit */}
@@ -274,7 +259,7 @@ export default function RegisterPage() {
         </button>
       </form>
 
-      <p className="mt-8 text-center text-sm text-gray-500">
+      <p className="mt-5 text-center text-sm text-gray-500">
         Already have an account?{' '}
         <Link to="/login" className="font-semibold text-green-600 hover:text-green-700 transition-colors">
           Sign in

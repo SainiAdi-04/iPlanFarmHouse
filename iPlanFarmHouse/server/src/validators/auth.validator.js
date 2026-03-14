@@ -22,8 +22,8 @@ export const registerSchema = z.object({
       "Password must contain at least one uppercase letter, one lowercase letter, and one digit"
     ),
 
-  role: z.enum(["FARMER", "CUSTOMER"], {
-    errorMap: () => ({ message: "Role must be either FARMER or CUSTOMER" }),
+  role: z.enum(["FARMER", "CUSTOMER", "EXPERT"], {
+    errorMap: () => ({ message: "Role must be FARMER, CUSTOMER, or EXPERT" }),
   }),
 });
 
