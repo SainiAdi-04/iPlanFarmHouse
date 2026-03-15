@@ -1,20 +1,9 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
-  provider = "prisma-client"
-  output   = "../src/generated/prisma"
+  provider = "prisma-client-js"
 }
 
 datasource db {
   provider = "postgresql"
-}
-
-enum Role {
-  ADMIN
-  FARMER
-  CUSTOMER
-  EXPERT
 }
 
 model User {
@@ -23,6 +12,43 @@ model User {
   email     String   @unique
   password  String
   role      Role     @default(CUSTOMER)
+  farmer    Farmer?
+  customer  Customer?
+  expert    Expert?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+model Farmer {
+  id         String   @id @default(uuid())
+  userId     String   @unique
+  isAccepted Boolean  @default(true)
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+model Customer {
+  id         String   @id @default(uuid())
+  userId     String   @unique
+  isAccepted Boolean  @default(true)
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+model Expert {
+  id         String   @id @default(uuid())
+  userId     String   @unique
+  isAccepted Boolean  @default(true)
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+enum Role {
+  ADMIN
+  FARMER
+  CUSTOMER
+  EXPERT
 }

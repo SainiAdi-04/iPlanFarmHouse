@@ -8,8 +8,44 @@ const USER_SELECT = {
   name: true,
   email: true,
   role: true,
+  farmer: {
+    select: {
+      isAccepted: true,
+    },
+  },
+  customer: {
+    select: {
+      isAccepted: true,
+    },
+  },
+  expert: {
+    select: {
+      isAccepted: true,
+    },
+  },
   createdAt: true,
   updatedAt: true,
+};
+
+const mapUserWithAcceptance = (user) => {
+  const acceptance =
+    user.role === "FARMER"
+      ? user.farmer?.isAccepted ?? false
+      : user.role === "EXPERT"
+      ? user.expert?.isAccepted ?? false
+      : user.role === "CUSTOMER"
+      ? user.customer?.isAccepted ?? false
+      : true;
+
+  return {
+    id: user.id,
+    name: user.name,
+    email: user.email,
+    role: user.role,
+    isAccepted: acceptance,
+    createdAt: user.createdAt,
+    updatedAt: user.updatedAt,
+  };
 };
 
 export const registerUser = async ({ name, email, password, role }) => {
@@ -20,23 +56,60 @@ export const registerUser = async ({ name, email, password, role }) => {
 
   const hashedPassword = await hashPassword(password);
 
-  const user = await prisma.user.create({
-    data: {
-      name,
-      email,
-      password: hashedPassword,
-      role,
-    },
-    select: USER_SELECT,
+  const user = await prisma.$transaction(async (tx) => {
+    const createdUser = await tx.user.create({
+      data: {
+        name,
+        email,
+        password: hashedPassword,
+        role,
+      },
+      select: USER_SELECT,
+    });
+
+    if (role === "FARMER") {
+      await tx.farmer.create({
+        data: { userId: createdUser.id, isAccepted: true },
+      });
+    }
+
+    if (role === "CUSTOMER") {
+      await tx.customer.create({
+        data: { userId: createdUser.id, isAccepted: true },
+      });
+    }
+
+    if (role === "EXPERT") {
+      await tx.expert.create({
+        data: { userId: createdUser.id, isAccepted: true },
+      });
+    }
+
+    return tx.user.findUnique({
+      where: { id: createdUser.id },
+      select: USER_SELECT,
+    });
   });
 
+  if (!user) {
+    throw new AppError("Unable to complete registration", 500);
+  }
+
+  const safeUser = mapUserWithAcceptance(user);
   const token = generateToken({ userId: user.id, role: user.role });
 
-  return { user, token };
+  return { user: safeUser, token };
 };
 
 export const loginUser = async ({ email, password }) => {
-  const user = await prisma.user.findUnique({ where: { email } });
+  const user = await prisma.user.findUnique({
+    where: { email },
+    include: {
+      farmer: true,
+      customer: true,
+      expert: true,
+    },
+  });
   if (!user) {
     throw new AppError("Invalid email or password", 401);
   }
@@ -48,8 +121,8 @@ export const loginUser = async ({ email, password }) => {
 
   const token = generateToken({ userId: user.id, role: user.role });
 
-  const { password: _, ...userWithoutPassword } = user;
-  return { user: userWithoutPassword, token };
+  const safeUser = mapUserWithAcceptance(user);
+  return { user: safeUser, token };
 };
 
 export const getCurrentUser = async (userId) => {
@@ -62,5 +135,5 @@ export const getCurrentUser = async (userId) => {
     throw new AppError("User not found", 404);
   }
 
-  return user;
+  return mapUserWithAcceptance(user);
 };

@@ -5,6 +5,7 @@ export interface User {
   name: string;
   email: string;
   role: 'ADMIN' | 'FARMER' | 'CUSTOMER' | 'EXPERT';
+  isAccepted: boolean;
   createdAt: string;
   updatedAt: string;
 }
